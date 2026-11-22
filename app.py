@@ -3,27 +3,24 @@ import pandas as pd
 
 
 def cargar_datos(ruta):
+    """RF-01: lee el CSV con pandas y devuelve la columna pm25_value como ndarray."""
     df = pd.read_csv(ruta)
     return df["pm25_value"].to_numpy(dtype=float)
 
 
 def limpiar_nulos(datos):
-    resultado = []
-    for x in datos:
-        if not np.isnan(x):
-            resultado.append(x)
-    return np.array(resultado)
+    """RF-02: elimina los NaN con una mascara booleana."""
+    return datos[~np.isnan(datos)]
 
 
 def filtrar_anomalias(datos):
-    resultado = []
-    for x in datos:
-        if x >= 0 and x <= 1000:
-            resultado.append(x)
-    return np.array(resultado)
+    """RF-03: descarta valores fisicamente imposibles (< 0 o > 1000)."""
+    mascara = (datos >= 0) & (datos <= 1000)
+    return datos[mascara]
 
 
 def calcular_estadisticas(datos):
+    """RF-04: KPI con funciones nativas de NumPy. Devuelve un dict de Python."""
     return {
         "media": float(np.mean(datos)),
         "mediana": float(np.median(datos)),
@@ -34,5 +31,6 @@ def calcular_estadisticas(datos):
 
 
 def generar_reporte(metricas, ruta_destino):
+    """RF-05: convierte el dict en DataFrame y lo guarda como CSV."""
     pd.DataFrame([metricas]).to_csv(ruta_destino, index=False)
     return True

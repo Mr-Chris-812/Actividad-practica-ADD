@@ -4,8 +4,8 @@ Sistema modular de procesamiento de mediciones de partículas PM2.5, desarrollad
 
 Proyecto de la actividad práctica de Análisis de Datos (RA1) · Ecosistema Python y NumPy.
 
-> **Estado actual: Fase verde**
-> Implementación básica terminada: la limpieza y el filtrado recorren el array con bucles. Los 7 tests pasan.
+> **Estado actual: Refactorizado**
+> Versión final: el procesamiento intermedio usa máscaras booleanas y funciones vectorizadas de NumPy, sin iteradores estándar. Los 7 tests pasan.
 
 ## Objetivo
 
@@ -85,9 +85,9 @@ Resultado sobre `dummy.csv`:
 | Función | Requisito | Entrada | Salida | Estado |
 |---------|-----------|---------|--------|--------|
 | `cargar_datos(ruta)` | RF-01 | Ruta de un CSV | `np.ndarray` con la serie `pm25_value` | Implementada |
-| `limpiar_nulos(datos)` | RF-02 | `np.ndarray` | Array sin valores `NaN` | Implementada (bucle) |
-| `filtrar_anomalias(datos)` | RF-03 | `np.ndarray` | Array sin valores `< 0` ni `> 1000` | Implementada (bucle) |
-| `calcular_estadisticas(datos)` | RF-04 | `np.ndarray` validado | `dict` con media, mediana, máximo, mínimo y desviación típica | Implementada |
+| `limpiar_nulos(datos)` | RF-02 | `np.ndarray` | Array sin valores `NaN` | Vectorizada |
+| `filtrar_anomalias(datos)` | RF-03 | `np.ndarray` | Array sin valores `< 0` ni `> 1000` | Vectorizada |
+| `calcular_estadisticas(datos)` | RF-04 | `np.ndarray` validado | `dict` con media, mediana, máximo, mínimo y desviación típica | Vectorizada |
 | `generar_reporte(metricas, ruta)` | RF-05 | `dict` y ruta de destino | `True` tras escribir el CSV | Implementada |
 
 ## Restricciones de diseño
@@ -103,8 +103,8 @@ El desarrollo sigue el ciclo rojo, verde y refactor. Cada fase está marcada con
 | Fase | Tag | Descripción | Estado |
 |------|-----|-------------|--------|
 | Roja | `fase-roja` | Funciones con `raise NotImplementedError`; los 7 tests fallan | Completada |
-| Verde | `fase-verde` | Implementación básica (con bucles) que supera los tests | Fase actual |
-| Refactor | `refactorizado` | Sustitución de bucles por vectorización NumPy, tests en verde | Pendiente |
+| Verde | `fase-verde` | Implementación básica (con bucles) que supera los tests | Completada |
+| Refactor | `refactorizado` | Sustitución de bucles por vectorización NumPy, tests en verde | Fase actual |
 
 Para ver el historial:
 
@@ -114,6 +114,8 @@ git log --oneline --decorate
 
 ## Decisiones técnicas
 
+- **Orden del pipeline:** primero se eliminan los nulos y después las anomalías, porque comparar un `NaN` con un umbral siempre da `False` y conviene tratarlo de forma explícita.
 - **Límites incluidos:** los valores `0` y `1000` se consideran válidos. Solo se descartan los estrictamente menores que 0 o mayores que 1000.
 - **Desviación típica poblacional:** se usa `np.std` con su valor por defecto (`ddof=0`).
 - **Valores `float`:** las métricas se convierten a `float` nativo de Python para que el diccionario no contenga tipos de NumPy y se exporte limpiamente a CSV.
+- **Vectorización:** `limpiar_nulos` y `filtrar_anomalias` indexan el array con una máscara booleana en lugar de recorrerlo con un bucle.
