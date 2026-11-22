@@ -4,8 +4,8 @@ Sistema modular de procesamiento de mediciones de partículas PM2.5, desarrollad
 
 Proyecto de la actividad práctica de Análisis de Datos (RA1) · Ecosistema Python y NumPy.
 
-> **Estado actual: Fase roja**
-> Las funciones están definidas pero sin implementar (`NotImplementedError`). Los 7 tests fallan, que es el comportamiento esperado en esta fase.
+> **Estado actual: Fase verde**
+> Implementación básica terminada: la limpieza y el filtrado recorren el array con bucles. Los 7 tests pasan.
 
 ## Objetivo
 
@@ -58,18 +58,37 @@ python -m pip install numpy pandas pytest ipykernel
 python -m pytest test/test_app.py
 ```
 
-En esta fase las pruebas **deben fallar** con `NotImplementedError`: confirman que los tests detectan la ausencia de implementación.
+3. (Opcional) La última celda del cuaderno lanza el pipeline completo sobre `dummy.csv` y genera `reporte.csv`.
 
+### Ejemplo de uso
+
+```python
+from app import (
+    cargar_datos, limpiar_nulos, filtrar_anomalias,
+    calcular_estadisticas, generar_reporte,
+)
+
+datos = cargar_datos("dummy.csv")
+datos = filtrar_anomalias(limpiar_nulos(datos))
+kpi = calcular_estadisticas(datos)
+generar_reporte(kpi, "reporte.csv")
+```
+
+Resultado sobre `dummy.csv`:
+
+```python
+{'media': 27.7, 'mediana': 22.1, 'maximo': 45.8, 'minimo': 15.2, 'desviacion_tipica': 13.105}
+```
 
 ## Funciones
 
 | Función | Requisito | Entrada | Salida | Estado |
 |---------|-----------|---------|--------|--------|
-| `cargar_datos(ruta)` | RF-01 | Ruta de un CSV | `np.ndarray` con la serie `pm25_value` | Pendiente |
-| `limpiar_nulos(datos)` | RF-02 | `np.ndarray` | Array sin valores `NaN` | Pendiente |
-| `filtrar_anomalias(datos)` | RF-03 | `np.ndarray` | Array sin valores `< 0` ni `> 1000` | Pendiente |
-| `calcular_estadisticas(datos)` | RF-04 | `np.ndarray` validado | `dict` con media, mediana, máximo, mínimo y desviación típica | Pendiente |
-| `generar_reporte(metricas, ruta)` | RF-05 | `dict` y ruta de destino | `True` tras escribir el CSV | Pendiente |
+| `cargar_datos(ruta)` | RF-01 | Ruta de un CSV | `np.ndarray` con la serie `pm25_value` | Implementada |
+| `limpiar_nulos(datos)` | RF-02 | `np.ndarray` | Array sin valores `NaN` | Implementada (bucle) |
+| `filtrar_anomalias(datos)` | RF-03 | `np.ndarray` | Array sin valores `< 0` ni `> 1000` | Implementada (bucle) |
+| `calcular_estadisticas(datos)` | RF-04 | `np.ndarray` validado | `dict` con media, mediana, máximo, mínimo y desviación típica | Implementada |
+| `generar_reporte(metricas, ruta)` | RF-05 | `dict` y ruta de destino | `True` tras escribir el CSV | Implementada |
 
 ## Restricciones de diseño
 
@@ -83,8 +102,8 @@ El desarrollo sigue el ciclo rojo, verde y refactor. Cada fase está marcada con
 
 | Fase | Tag | Descripción | Estado |
 |------|-----|-------------|--------|
-| Roja | `fase-roja` | Funciones con `raise NotImplementedError`; los 7 tests fallan | Fase actual |
-| Verde | `fase-verde` | Implementación básica (con bucles) que supera los tests | Pendiente |
+| Roja | `fase-roja` | Funciones con `raise NotImplementedError`; los 7 tests fallan | Completada |
+| Verde | `fase-verde` | Implementación básica (con bucles) que supera los tests | Fase actual |
 | Refactor | `refactorizado` | Sustitución de bucles por vectorización NumPy, tests en verde | Pendiente |
 
 Para ver el historial:
@@ -93,7 +112,7 @@ Para ver el historial:
 git log --oneline --decorate
 ```
 
-## Decisiones previstas
+## Decisiones técnicas
 
 - **Límites incluidos:** los valores `0` y `1000` se consideran válidos. Solo se descartan los estrictamente menores que 0 o mayores que 1000.
 - **Desviación típica poblacional:** se usa `np.std` con su valor por defecto (`ddof=0`).

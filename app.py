@@ -3,20 +3,36 @@ import pandas as pd
 
 
 def cargar_datos(ruta):
-    raise NotImplementedError("Código no implementado")
+    df = pd.read_csv(ruta)
+    return df["pm25_value"].to_numpy(dtype=float)
 
 
 def limpiar_nulos(datos):
-    raise NotImplementedError("Código no implementado")
+    resultado = []
+    for x in datos:
+        if not np.isnan(x):
+            resultado.append(x)
+    return np.array(resultado)
 
 
 def filtrar_anomalias(datos):
-    raise NotImplementedError("Código no implementado")
+    resultado = []
+    for x in datos:
+        if x >= 0 and x <= 1000:
+            resultado.append(x)
+    return np.array(resultado)
 
 
 def calcular_estadisticas(datos):
-    raise NotImplementedError("Código no implementado")
+    return {
+        "media": float(np.mean(datos)),
+        "mediana": float(np.median(datos)),
+        "maximo": float(np.max(datos)),
+        "minimo": float(np.min(datos)),
+        "desviacion_tipica": float(np.std(datos)),
+    }
 
 
 def generar_reporte(metricas, ruta_destino):
-    raise NotImplementedError("Código no implementado")
+    pd.DataFrame([metricas]).to_csv(ruta_destino, index=False)
+    return True
